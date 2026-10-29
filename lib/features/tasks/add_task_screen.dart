@@ -11,7 +11,10 @@ import 'task.dart';
 import 'tasks_providers.dart';
 
 class AddTaskScreen extends ConsumerStatefulWidget {
-  const AddTaskScreen({super.key});
+  const AddTaskScreen({super.key, this.taskId});
+
+  /// When set, the screen edits this task instead of creating a new one.
+  final String? taskId;
 
   @override
   ConsumerState<AddTaskScreen> createState() => _AddTaskScreenState();
@@ -20,25 +23,52 @@ class AddTaskScreen extends ConsumerStatefulWidget {
 class _AddTaskScreenState extends ConsumerState<AddTaskScreen> {
   final _formKey = GlobalKey<FormState>();
   final _title = TextEditingController();
+  final _notes = TextEditingController();
   String? _courseId;
   DateTime _date = startOfDay(DateTime.now());
   TimeOfDay _time = const TimeOfDay(hour: 23, minute: 59);
   Priority _priority = Priority.medium;
+    int? _remindBefore = 60;
   bool _saving = false;
   String? _error;
+
+  bool get _isEdit => widget.taskId != null;
+
+  @override
+  void initState() {
+    super.initState();
+    final id = widget.taskId;
+    if (id == null) return;
+    final tasks = ref.read(tasksProvider).value ?? const <Task>[];
+    for (final t in tasks) {
+      if (t.id == id) {
+        _title.text = t.title;
+        _notes.text = t.notes;
+        _courseId = t.courseId;
+        _date = startOfDay(t.dueAt);
+        _time = TimeOfDay(hour: t.dueAt.hour, minute: t.dueAt.minute);
+        _priority = t.priority;
+                _priority = t.priority;
+        _remindBefore = t.remindBefore;
+        break;
+      }
+    }
+  }
 
   @override
   void dispose() {
     _title.dispose();
+    _notes.dispose();
     super.dispose();
   }
 
   Future<void> _pickDate() async {
     final now = DateTime.now();
+    final earliest = startOfDay(now).subtract(const Duration(days: 30));
     final picked = await showDatePicker(
       context: context,
-      initialDate: _date,
-      firstDate: startOfDay(now).subtract(const Duration(days: 30)),
+      initialDate: _date.isBefore(earliest) ? earliest : _date,
+      firstDate: _date.isBefore(earliest) ? _date : earliest,
       lastDate: DateTime(now.year + 3),
     );
     if (picked != null) setState(() => _date = picked);
@@ -70,12 +100,26 @@ class _AddTaskScreenState extends ConsumerState<AddTaskScreen> {
         _time.hour,
         _time.minute,
       );
-      await repo.addTask(
-        title: _title.text,
-        courseId: _courseId!,
-        dueAt: dueAt,
-        priority: _priority,
-      );
+           if (_isEdit) {
+        await repo.updateTask(
+          widget.taskId!,
+          title: _title.text,
+          courseId: _courseId!,
+          dueAt: dueAt,
+          priority: _priority,
+          notes: _notes.text,
+          remindBefore: _remindBefore,
+        );
+      } else {
+        await repo.addTask(
+          title: _title.text,
+          courseId: _courseId!,
+          dueAt: dueAt,
+          priority: _priority,
+          notes: _notes.text,
+          remindBefore: _remindBefore,
+        );
+      }
       if (mounted) context.pop();
     } catch (_) {
       if (mounted) {
@@ -99,7 +143,7 @@ class _AddTaskScreenState extends ConsumerState<AddTaskScreen> {
     );
 
     return Scaffold(
-      appBar: AppBar(title: const Text('New task')),
+      appBar: AppBar(title: Text(_isEdit ? 'Edit task' : 'New task')),
       body: SafeArea(
         child: Form(
           key: _formKey,
@@ -193,6 +237,17 @@ class _AddTaskScreenState extends ConsumerState<AddTaskScreen> {
                 onSelectionChanged: (s) =>
                     setState(() => _priority = s.first),
               ),
+              const SizedBox(height: 20),
+              TextFormField(
+                controller: _notes,
+                minLines: 2,
+                maxLines: 4,
+                textCapitalization: TextCapitalization.sentences,
+                decoration: const InputDecoration(
+                  labelText: 'Notes (optional)',
+                  alignLabelWithHint: true,
+                ),
+              ),
               if (_error != null) ...[
                 const SizedBox(height: 12),
                 Text(_error!, style: TextStyle(color: Colors.red.shade800)),
@@ -206,7 +261,7 @@ class _AddTaskScreenState extends ConsumerState<AddTaskScreen> {
                         height: 20,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Text('Save task'),
+                    : Text(_isEdit ? 'Save changes' : 'Save task'),
               ),
             ],
           ),

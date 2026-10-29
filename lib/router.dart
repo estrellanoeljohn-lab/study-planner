@@ -15,6 +15,7 @@ import 'features/stats/stats_screen.dart';
 import 'features/today/today_screen.dart';
 import 'shell/app_shell.dart';
 import 'features/tasks/add_task_screen.dart';
+import 'features/tasks/task_detail_screen.dart';
 class _AuthRefresh extends ChangeNotifier {
   _AuthRefresh(Stream<User?> stream) {
     _sub = stream.listen((_) => notifyListeners());
@@ -62,6 +63,18 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/add-task',
         builder: (context, state) => const AddTaskScreen(),
       ),
+           GoRoute(
+        path: '/task/:taskId',
+        builder: (context, state) =>
+            TaskDetailScreen(taskId: state.pathParameters['taskId']!),
+        routes: [
+          GoRoute(
+            path: 'edit',
+            builder: (context, state) =>
+                AddTaskScreen(taskId: state.pathParameters['taskId']),
+          ),
+        ],
+      ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, shell) => AppShell(navigationShell: shell),
         branches: [
@@ -78,9 +91,10 @@ final routerProvider = Provider<GoRouter>((ref) {
             ),
           ]),
           StatefulShellBranch(routes: [
-            GoRoute(
+                        GoRoute(
               path: '/focus',
-              builder: (context, state) => const FocusScreen(),
+              builder: (context, state) =>
+                  FocusScreen(taskId: state.uri.queryParameters['taskId']),
             ),
           ]),
           StatefulShellBranch(routes: [

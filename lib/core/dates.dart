@@ -20,3 +20,14 @@ DateTime startOfDay(DateTime d) => DateTime(d.year, d.month, d.day);
 
 bool isSameDay(DateTime a, DateTime b) =>
     a.year == b.year && a.month == b.month && a.day == b.day;
+    String formatDuration(int seconds) {
+  final minutes = seconds ~/ 60;
+  final h = minutes ~/ 60;
+  final m = minutes % 60;
+  if (h == 0) return '${m}m';
+  return m == 0 ? '${h}h' : '${h}h ${m}m';
+}
+DateTime startOfWeek(DateTime d) =>
+    DateTime(d.year, d.month, d.day - (d.weekday - 1));
+
+String weekdayShort(int weekday) => _weekdays[weekday - 1];

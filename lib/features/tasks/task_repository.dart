@@ -23,14 +23,37 @@ class TaskRepository {
     required String courseId,
     required DateTime dueAt,
     required Priority priority,
+    String notes = '',
+    int? remindBefore,
   }) {
     return _col.add({
       'title': title.trim(),
       'courseId': courseId,
       'dueAt': Timestamp.fromDate(dueAt),
       'priority': priority.index,
+      'notes': notes.trim(),
+      'remindBefore': remindBefore,
       'done': false,
       'createdAt': FieldValue.serverTimestamp(),
+    });
+  }
+
+  Future<void> updateTask(
+    String id, {
+    required String title,
+    required String courseId,
+    required DateTime dueAt,
+    required Priority priority,
+    required String notes,
+    required int? remindBefore,
+  }) {
+    return _col.doc(id).update({
+      'title': title.trim(),
+      'courseId': courseId,
+      'dueAt': Timestamp.fromDate(dueAt),
+      'priority': priority.index,
+      'notes': notes.trim(),
+      'remindBefore': remindBefore,
     });
   }
 
@@ -40,4 +63,6 @@ class TaskRepository {
       'completedAt': done ? FieldValue.serverTimestamp() : null,
     });
   }
+
+  Future<void> deleteTask(String id) => _col.doc(id).delete();
 }
