@@ -57,7 +57,11 @@ class StatsScreen extends ConsumerWidget {
               Text(
                 'This week · ${formatShortDate(weekStart)} to '
                 '${formatShortDate(weekLast)}',
-                style: const TextStyle(fontSize: 14, color: kMuted),
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: kMuted,
+                  letterSpacing: 0.3,
+                ),
               ),
               const SizedBox(height: 16),
               Row(
@@ -66,6 +70,8 @@ class StatsScreen extends ConsumerWidget {
                     child: _StatCard(
                       formatDuration(summary.weekSeconds),
                       'Study time',
+                      Icons.schedule_rounded,
+                      kPrimary,
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -73,6 +79,8 @@ class StatsScreen extends ConsumerWidget {
                     child: _StatCard(
                       '${summary.streak} ${summary.streak == 1 ? 'day' : 'days'}',
                       'Streak',
+                      Icons.local_fire_department_rounded,
+                      const Color(0xFFE87461),
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -80,6 +88,8 @@ class StatsScreen extends ConsumerWidget {
                     child: _StatCard(
                       rate == null ? '–' : '${(rate * 100).round()}%',
                       'Tasks done',
+                      Icons.check_circle_outline_rounded,
+                      kSuccess,
                     ),
                   ),
                 ],
@@ -88,7 +98,7 @@ class StatsScreen extends ConsumerWidget {
               _Card(
                 title: 'Study hours by day',
                 child: SizedBox(
-                  height: 150,
+                  height: 160,
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
@@ -97,7 +107,7 @@ class StatsScreen extends ConsumerWidget {
                           child: _DayBar(
                             label: weekdayShort(i + 1),
                             seconds: summary.daySeconds[i],
-                            height: 100 * summary.daySeconds[i] / scale,
+                            height: 110 * summary.daySeconds[i] / scale,
                             isToday: i == now.weekday - 1,
                           ),
                         ),
@@ -147,10 +157,11 @@ class _Card extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: kSurface,
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: kDivider),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -163,7 +174,7 @@ class _Card extends StatelessWidget {
               color: kInk,
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
           child,
         ],
       ),
@@ -172,22 +183,27 @@ class _Card extends StatelessWidget {
 }
 
 class _StatCard extends StatelessWidget {
-  const _StatCard(this.value, this.label);
+  const _StatCard(this.value, this.label, this.icon, this.iconColor);
 
   final String value;
   final String label;
+  final IconData icon;
+  final Color iconColor;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: kSurface,
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: kDivider),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Icon(icon, color: iconColor, size: 20),
+          const SizedBox(height: 8),
           FittedBox(
             fit: BoxFit.scaleDown,
             alignment: Alignment.centerLeft,
@@ -195,7 +211,7 @@ class _StatCard extends StatelessWidget {
               value,
               style: const TextStyle(
                 fontSize: 22,
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.w800,
                 color: kInk,
               ),
             ),
@@ -226,8 +242,8 @@ class _DayBar extends StatelessWidget {
     final empty = seconds == 0;
     final barHeight = empty ? 4.0 : (height < 8 ? 8.0 : height);
     final color = empty
-        ? const Color(0xFFDDE2EE)
-        : (isToday ? kPrimary : const Color(0xFF6F8BEA));
+        ? const Color(0xFF2A3148)
+        : (isToday ? kPrimary : kAccent);
 
     return Tooltip(
       message: '$label: ${formatDuration(seconds)}',
@@ -235,22 +251,30 @@ class _DayBar extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           Container(
-            width: 28,
+            width: 30,
             height: barHeight,
             decoration: BoxDecoration(
               color: color,
               borderRadius: empty
                   ? BorderRadius.circular(2)
                   : const BorderRadius.vertical(top: Radius.circular(8)),
+              boxShadow: (!empty && isToday)
+                  ? [
+                      BoxShadow(
+                        color: kPrimary.withValues(alpha: 0.3),
+                        blurRadius: 8,
+                      ),
+                    ]
+                  : null,
             ),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 8),
           Text(
             label,
             style: TextStyle(
               fontSize: 12,
               fontWeight: isToday ? FontWeight.w700 : FontWeight.w500,
-              color: isToday ? kInk : kMuted,
+              color: isToday ? kPrimary : kMuted,
             ),
           ),
         ],
@@ -282,12 +306,21 @@ class _CourseRow extends StatelessWidget {
     final factor = ratio < 0.02 ? 0.02 : (ratio > 1 ? 1.0 : ratio);
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.only(bottom: 14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
+              Container(
+                width: 8,
+                height: 8,
+                margin: const EdgeInsets.only(right: 8),
+                decoration: BoxDecoration(
+                  color: color,
+                  shape: BoxShape.circle,
+                ),
+              ),
               Expanded(
                 child: Text(
                   name,
@@ -304,17 +337,17 @@ class _CourseRow extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: kInk,
+                  color: kMuted,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 8),
           Container(
-            height: 8,
+            height: 6,
             decoration: BoxDecoration(
-              color: const Color(0xFFE3E7F0),
-              borderRadius: BorderRadius.circular(4),
+              color: const Color(0xFF2A3148),
+              borderRadius: BorderRadius.circular(3),
             ),
             child: FractionallySizedBox(
               alignment: Alignment.centerLeft,
@@ -322,7 +355,13 @@ class _CourseRow extends StatelessWidget {
               child: DecoratedBox(
                 decoration: BoxDecoration(
                   color: color,
-                  borderRadius: BorderRadius.circular(4),
+                  borderRadius: BorderRadius.circular(3),
+                  boxShadow: [
+                    BoxShadow(
+                      color: color.withValues(alpha: 0.3),
+                      blurRadius: 4,
+                    ),
+                  ],
                 ),
               ),
             ),

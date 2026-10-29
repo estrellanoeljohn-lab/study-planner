@@ -10,9 +10,11 @@ class CourseColor {
 }
 
 const courseColors = [
-  CourseColor('Blue', Color(0xFF3B5BDB), Color(0xFFDBE4FF), Color(0xFF2B46A8)),
-  CourseColor('Teal', Color(0xFF0CA678), Color(0xFFD3F5E8), Color(0xFF05674D)),
-  CourseColor('Orange', Color(0xFFF76707), Color(0xFFFFE6D2), Color(0xFF9A3F06)),
-  CourseColor('Violet', Color(0xFF9C36B5), Color(0xFFF1DDF7), Color(0xFF6A1B82)),
-  CourseColor('Rose', Color(0xFFD6336C), Color(0xFFFFE0EB), Color(0xFF9C1F4B)),
+  CourseColor('Amber',   Color(0xFFE8A838), Color(0xFF3D3018), Color(0xFFF5D590)),
+  CourseColor('Sage',    Color(0xFF4CAF7D), Color(0xFF1A3328), Color(0xFF8FDDB5)),
+  CourseColor('Coral',   Color(0xFFE87461), Color(0xFF3D1E18), Color(0xFFF5A899)),
+  CourseColor('Sky',     Color(0xFF6C9BCF), Color(0xFF1A2A3D), Color(0xFFA8C8E8)),
+  CourseColor('Orchid',  Color(0xFFB07CC6), Color(0xFF2D1A3D), Color(0xFFD4ADE4)),
+  CourseColor('Peach',   Color(0xFFE8956C), Color(0xFF3D2518), Color(0xFFF5C4A0)),
+  CourseColor('Mint',    Color(0xFF5CB8A5), Color(0xFF183D34), Color(0xFF98DBC9)),
 ];

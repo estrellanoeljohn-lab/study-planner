@@ -71,7 +71,7 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
           shrinkWrap: true,
           children: [
             const Padding(
-              padding: EdgeInsets.fromLTRB(20, 16, 20, 8),
+              padding: EdgeInsets.fromLTRB(20, 20, 20, 8),
               child: Text(
                 'What are you studying?',
                 style: TextStyle(
@@ -82,13 +82,21 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
               ),
             ),
             ListTile(
-              title: const Text('General study (no task)'),
+              leading: const Icon(Icons.blur_on_rounded, color: kMuted),
+              title: const Text(
+                'General study (no task)',
+                style: TextStyle(color: kInk),
+              ),
               onTap: () => Navigator.of(ctx).pop(const _Choice(null)),
             ),
             for (final t in open)
               ListTile(
-                title: Text(t.title),
-                subtitle: Text(courseById[t.courseId]?.name ?? 'No course'),
+                leading: const Icon(Icons.task_alt_rounded, color: kPrimary, size: 20),
+                title: Text(t.title, style: const TextStyle(color: kInk)),
+                subtitle: Text(
+                  courseById[t.courseId]?.name ?? 'No course',
+                  style: const TextStyle(color: kMuted),
+                ),
                 onTap: () => Navigator.of(ctx).pop(_Choice(t)),
               ),
           ],
@@ -124,7 +132,7 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
     final courseById = {for (final c in courses) c.id: c};
 
     final isFocus = state.phase == FocusPhase.focus;
-    final accent = isFocus ? kPrimary : const Color(0xFF0CA678);
+    final accent = isFocus ? kPrimary : kSuccess;
 
     final now = DateTime.now();
     final todaySessions =
@@ -137,27 +145,34 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
         children: [
+          // Target chip
           Center(
             child: ActionChip(
-              avatar: const Icon(Icons.menu_book_outlined, size: 18),
+              avatar: const Icon(Icons.menu_book_outlined, size: 18, color: kPrimary),
               label: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 280),
                 child: Text(
                   _targetLabel(state, courseById, tasks),
                   overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(color: kInk),
                 ),
               ),
               onPressed:
                   state.running ? null : () => _pickTarget(tasks, courseById),
             ),
           ),
-          const SizedBox(height: 28),
+          const SizedBox(height: 32),
+
+          // Timer ring
           Center(
             child: SizedBox(
-              width: 260,
-              height: 260,
+              width: 270,
+              height: 270,
               child: CustomPaint(
-                painter: _RingPainter(state.remaining / state.total, accent),
+                painter: _RingPainter(
+                  state.remaining / state.total,
+                  accent,
+                ),
                 child: Center(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -165,19 +180,21 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
                       Text(
                         _clock(state.remaining),
                         style: const TextStyle(
-                          fontSize: 52,
-                          fontWeight: FontWeight.w700,
+                          fontSize: 56,
+                          fontWeight: FontWeight.w800,
                           color: kInk,
+                          letterSpacing: -1,
                         ),
                       ),
+                      const SizedBox(height: 4),
                       Text(
                         isFocus
                             ? 'Session ${state.completed + 1} of $kSessionsPerCycle'
                             : 'Break time',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
-                          color: kMuted,
+                          color: accent,
                         ),
                       ),
                     ],
@@ -186,14 +203,19 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
               ),
             ),
           ),
-          const SizedBox(height: 28),
+          const SizedBox(height: 32),
+
+          // Controls
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               SizedBox(
-                width: 160,
+                width: 165,
                 child: FilledButton(
                   onPressed: state.running ? controller.pause : controller.start,
+                  style: FilledButton.styleFrom(
+                    backgroundColor: accent,
+                  ),
                   child: Text(
                     state.running
                         ? 'Pause'
@@ -206,12 +228,6 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
                 width: 110,
                 child: OutlinedButton(
                   onPressed: controller.reset,
-                  style: OutlinedButton.styleFrom(
-                    minimumSize: const Size.fromHeight(52),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
                   child: const Text('Reset'),
                 ),
               ),
@@ -232,33 +248,51 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
               style: const TextStyle(fontSize: 13, color: kMuted),
             ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 28),
+
+          // Today's summary
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: kSurface,
               borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: kDivider),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Row(
               children: [
-                const Text(
-                  'Today’s focus',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: kMuted,
+                Container(
+                  width: 42,
+                  height: 42,
+                  decoration: BoxDecoration(
+                    color: kPrimary.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(12),
                   ),
+                  child: const Icon(Icons.local_fire_department_rounded,
+                      color: kPrimary, size: 22),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  '${formatDuration(todaySeconds)} · ${todaySessions.length} '
-                  '${todaySessions.length == 1 ? 'session' : 'sessions'}',
-                  style: const TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.w700,
-                    color: kInk,
-                  ),
+                const SizedBox(width: 14),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "Today's focus",
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: kMuted,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '${formatDuration(todaySeconds)} · ${todaySessions.length} '
+                      '${todaySessions.length == 1 ? 'session' : 'sessions'}',
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                        color: kInk,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -281,14 +315,32 @@ class _RingPainter extends CustomPainter {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = (size.width - stroke) / 2;
 
+    // Track ring
     canvas.drawCircle(
       center,
       radius,
       Paint()
-        ..color = const Color(0xFFDDE2EE)
+        ..color = const Color(0xFF2A3148)
         ..style = PaintingStyle.stroke
         ..strokeWidth = stroke,
     );
+
+    // Glow effect
+    if (progress > 0) {
+      canvas.drawArc(
+        Rect.fromCircle(center: center, radius: radius),
+        -math.pi / 2,
+        2 * math.pi * progress.clamp(0.0, 1.0),
+        false,
+        Paint()
+          ..color = color.withValues(alpha: 0.2)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = stroke + 8
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8),
+      );
+    }
+
+    // Progress arc
     canvas.drawArc(
       Rect.fromCircle(center: center, radius: radius),
       -math.pi / 2,

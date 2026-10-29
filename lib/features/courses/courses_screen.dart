@@ -37,11 +37,30 @@ class CoursesScreen extends ConsumerWidget {
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
           children: [
             if (list.isEmpty)
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 24),
-                child: Text(
-                  'No courses yet. Add your first one to get started.',
-                  style: TextStyle(color: kMuted, fontSize: 15, height: 1.5),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 24),
+                child: Column(
+                  children: [
+                    Icon(
+                      Icons.menu_book_outlined,
+                      size: 48,
+                      color: kMuted.withValues(alpha: 0.4),
+                    ),
+                    const SizedBox(height: 12),
+                    const Text(
+                      'No courses yet',
+                      style: TextStyle(
+                        color: kInk,
+                        fontSize: 17,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    const Text(
+                      'Add your first one to get started.',
+                      style: TextStyle(color: kMuted, fontSize: 14),
+                    ),
+                  ],
                 ),
               ),
             for (final c in list)
@@ -50,16 +69,11 @@ class CoursesScreen extends ConsumerWidget {
                 colorIndex: c.colorIndex,
                 subtitle: _subtitle(c, tasks),
               ),
+            const SizedBox(height: 8),
             OutlinedButton.icon(
               onPressed: () => context.push('/add-course'),
-              icon: const Icon(Icons.add),
+              icon: const Icon(Icons.add_rounded),
               label: const Text('Add course'),
-              style: OutlinedButton.styleFrom(
-                minimumSize: const Size.fromHeight(52),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-              ),
             ),
           ],
         ),

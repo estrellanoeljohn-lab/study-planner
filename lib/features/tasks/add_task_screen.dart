@@ -153,15 +153,24 @@ class _AddTaskScreenState extends ConsumerState<AddTaskScreen> {
               TextFormField(
                 controller: _title,
                 textCapitalization: TextCapitalization.sentences,
-                decoration: const InputDecoration(labelText: 'Title'),
+                style: const TextStyle(color: kInk),
+                decoration: const InputDecoration(
+                  labelText: 'Title',
+                  prefixIcon: Icon(Icons.edit_note_rounded, color: kMuted, size: 22),
+                ),
                 validator: (v) => (v == null || v.trim().isEmpty)
                     ? 'Enter a task title'
                     : null,
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 24),
               const Text(
-                'Course',
-                style: TextStyle(fontWeight: FontWeight.w700, color: kInk),
+                'COURSE',
+                style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  color: kMuted,
+                  fontSize: 12,
+                  letterSpacing: 1.2,
+                ),
               ),
               const SizedBox(height: 10),
               if (courses.isEmpty) ...[
@@ -185,23 +194,32 @@ class _AddTaskScreenState extends ConsumerState<AddTaskScreen> {
                         selectedColor:
                             courseColors[c.colorIndex % courseColors.length]
                                 .tint,
+                        labelStyle: TextStyle(
+                          color: _courseId == c.id
+                              ? courseColors[c.colorIndex % courseColors.length].onTint
+                              : kInk,
+                          fontWeight: FontWeight.w600,
+                        ),
                         onSelected: (_) => setState(() => _courseId = c.id),
                       ),
                   ],
                 ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 24),
               Row(
                 children: [
                   Expanded(
                     child: InkWell(
                       onTap: _pickDate,
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(14),
                       child: InputDecorator(
                         decoration: const InputDecoration(
                           labelText: 'Due date',
-                          suffixIcon: Icon(Icons.calendar_today_outlined),
+                          suffixIcon: Icon(Icons.calendar_today_outlined, color: kMuted),
                         ),
-                        child: Text(formatWeekdayDate(_date)),
+                        child: Text(
+                          formatWeekdayDate(_date),
+                          style: const TextStyle(color: kInk),
+                        ),
                       ),
                     ),
                   ),
@@ -209,22 +227,30 @@ class _AddTaskScreenState extends ConsumerState<AddTaskScreen> {
                   Expanded(
                     child: InkWell(
                       onTap: _pickTime,
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(14),
                       child: InputDecorator(
                         decoration: const InputDecoration(
                           labelText: 'Time',
-                          suffixIcon: Icon(Icons.schedule),
+                          suffixIcon: Icon(Icons.schedule, color: kMuted),
                         ),
-                        child: Text(formatTime(dueAt)),
+                        child: Text(
+                          formatTime(dueAt),
+                          style: const TextStyle(color: kInk),
+                        ),
                       ),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 24),
               const Text(
-                'Priority',
-                style: TextStyle(fontWeight: FontWeight.w700, color: kInk),
+                'PRIORITY',
+                style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  color: kMuted,
+                  fontSize: 12,
+                  letterSpacing: 1.2,
+                ),
               ),
               const SizedBox(height: 10),
               SegmentedButton<Priority>(
@@ -237,29 +263,44 @@ class _AddTaskScreenState extends ConsumerState<AddTaskScreen> {
                 onSelectionChanged: (s) =>
                     setState(() => _priority = s.first),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 24),
               TextFormField(
                 controller: _notes,
                 minLines: 2,
                 maxLines: 4,
                 textCapitalization: TextCapitalization.sentences,
+                style: const TextStyle(color: kInk),
                 decoration: const InputDecoration(
                   labelText: 'Notes (optional)',
                   alignLabelWithHint: true,
                 ),
               ),
               if (_error != null) ...[
-                const SizedBox(height: 12),
-                Text(_error!, style: TextStyle(color: Colors.red.shade800)),
+                const SizedBox(height: 14),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: kError.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: kError.withValues(alpha: 0.3)),
+                  ),
+                  child: Text(
+                    _error!,
+                    style: const TextStyle(color: kError, fontSize: 13),
+                  ),
+                ),
               ],
-              const SizedBox(height: 24),
+              const SizedBox(height: 28),
               FilledButton(
                 onPressed: _saving ? null : _save,
                 child: _saving
                     ? const SizedBox(
                         width: 20,
                         height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Color(0xFF1A1200),
+                        ),
                       )
                     : Text(_isEdit ? 'Save changes' : 'Save task'),
               ),

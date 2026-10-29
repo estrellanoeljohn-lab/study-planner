@@ -23,8 +23,11 @@ class TaskDetailScreen extends ConsumerWidget {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Delete this task?'),
-        content: const Text('This cannot be undone.'),
+        title: const Text('Delete this task?', style: TextStyle(color: kInk)),
+        content: const Text(
+          'This cannot be undone.',
+          style: TextStyle(color: kMuted),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
@@ -32,6 +35,7 @@ class TaskDetailScreen extends ConsumerWidget {
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
+            style: TextButton.styleFrom(foregroundColor: kError),
             child: const Text('Delete'),
           ),
         ],
@@ -56,7 +60,10 @@ class TaskDetailScreen extends ConsumerWidget {
         body: Center(
           child: tasksAsync.isLoading
               ? const CircularProgressIndicator()
-              : const Text('This task no longer exists.'),
+              : const Text(
+                  'This task no longer exists.',
+                  style: TextStyle(color: kMuted),
+                ),
         ),
       );
     }
@@ -67,16 +74,20 @@ class TaskDetailScreen extends ConsumerWidget {
         : courseColors[course.colorIndex % courseColors.length];
     final overdue = !task.done && task.dueAt.isBefore(DateTime.now());
     final (priorityText, priorityBg, priorityFg) = switch (task.priority) {
-      Priority.low => ('Low priority', const Color(0xFFE3E7F0), kMuted),
+      Priority.low => (
+          'Low priority',
+          kMuted.withValues(alpha: 0.15),
+          kMuted,
+        ),
       Priority.medium => (
           'Medium priority',
-          const Color(0xFFFFE8CC),
-          const Color(0xFF8F4A00),
+          kPrimary.withValues(alpha: 0.15),
+          kPrimary,
         ),
       Priority.high => (
           'High priority',
-          const Color(0xFFFFE0E0),
-          const Color(0xFFA61E1E),
+          kError.withValues(alpha: 0.15),
+          kError,
         ),
     };
 
@@ -97,47 +108,51 @@ class TaskDetailScreen extends ConsumerWidget {
             Text(
               task.title,
               style: const TextStyle(
-                fontSize: 26,
-                fontWeight: FontWeight.w700,
+                fontSize: 28,
+                fontWeight: FontWeight.w800,
                 color: kInk,
+                letterSpacing: -0.3,
               ),
             ),
-            const SizedBox(height: 14),
+            const SizedBox(height: 16),
             Wrap(
               spacing: 8,
               runSpacing: 8,
               children: [
                 _InfoChip(
                   course?.name ?? 'No course',
-                  courseColor?.tint ?? const Color(0xFFE3E7F0),
+                  courseColor?.tint ?? kMuted.withValues(alpha: 0.15),
                   courseColor?.onTint ?? kMuted,
                 ),
                 _InfoChip(priorityText, priorityBg, priorityFg),
                 _InfoChip(
                   '${formatWeekdayDate(task.dueAt)} · ${formatTime(task.dueAt)}',
-                  overdue ? const Color(0xFFFFE0E0) : const Color(0xFFE8EDFF),
-                  overdue ? const Color(0xFFA61E1E) : const Color(0xFF2F4BC4),
+                  overdue
+                      ? kError.withValues(alpha: 0.15)
+                      : kAccent.withValues(alpha: 0.15),
+                  overdue ? kError : kAccent,
                 ),
                 if (task.remindBefore != null)
                   _InfoChip(
                     'Reminder: ${reminderLabel(task.remindBefore)}',
-                    const Color(0xFFE8EDFF),
-                    const Color(0xFF2F4BC4),
+                    kAccent.withValues(alpha: 0.15),
+                    kAccent,
                   ),
                 if (task.done)
-                  const _InfoChip(
-                    'Done',
-                    Color(0xFFD3F5E8),
-                    Color(0xFF05674D),
+                  _InfoChip(
+                    'Done ✓',
+                    kSuccess.withValues(alpha: 0.15),
+                    kSuccess,
                   ),
               ],
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 24),
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(18),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: kSurface,
                 borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: kDivider),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -148,14 +163,15 @@ class TaskDetailScreen extends ConsumerWidget {
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
                       color: kMuted,
+                      letterSpacing: 0.5,
                     ),
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 8),
                   Text(
                     task.notes.isEmpty ? 'No notes yet.' : task.notes,
                     style: TextStyle(
                       fontSize: 15,
-                      height: 1.5,
+                      height: 1.6,
                       color: task.notes.isEmpty ? kMuted : kInk,
                     ),
                   ),
@@ -173,19 +189,13 @@ class TaskDetailScreen extends ConsumerWidget {
               onPressed: () => ref
                   .read(taskRepositoryProvider)
                   ?.setDone(task.id, !task.done),
-              style: OutlinedButton.styleFrom(
-                minimumSize: const Size.fromHeight(52),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
               child: Text(task.done ? 'Mark as not done' : 'Mark as done'),
             ),
             const SizedBox(height: 6),
             TextButton(
               onPressed: () => _confirmDelete(context, ref, task),
               style: TextButton.styleFrom(
-                foregroundColor: const Color(0xFFC92A2A),
+                foregroundColor: kError,
                 minimumSize: const Size.fromHeight(48),
               ),
               child: const Text('Delete task'),
@@ -211,6 +221,7 @@ class _InfoChip extends StatelessWidget {
       decoration: BoxDecoration(
         color: background,
         borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: foreground.withValues(alpha: 0.25)),
       ),
       child: Text(
         text,

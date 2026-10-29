@@ -33,13 +33,21 @@ class TaskTile extends ConsumerWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Material(
-        color: Colors.white,
+        color: kSurface,
         borderRadius: BorderRadius.circular(14),
         child: InkWell(
           borderRadius: BorderRadius.circular(14),
           onTap: () => context.push('/task/${task.id}'),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(6, 8, 14, 8),
+          child: Container(
+            padding: const EdgeInsets.fromLTRB(6, 10, 14, 10),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: task.done
+                    ? Colors.transparent
+                    : (color?.accent.withValues(alpha: 0.2) ?? kDivider),
+              ),
+            ),
             child: Row(
               children: [
                 Checkbox(
@@ -57,15 +65,21 @@ class TaskTile extends ConsumerWidget {
                         style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w700,
-                          color: task.done ? kMuted : kInk,
+                          color: task.done
+                              ? kMuted.withValues(alpha: 0.6)
+                              : kInk,
                           decoration:
                               task.done ? TextDecoration.lineThrough : null,
+                          decorationColor: kMuted,
                         ),
                       ),
-                      const SizedBox(height: 2),
+                      const SizedBox(height: 3),
                       Text(
                         '${course?.name ?? 'No course'} · $when',
-                        style: const TextStyle(fontSize: 13, color: kMuted),
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: kMuted,
+                        ),
                       ),
                     ],
                   ),
@@ -74,19 +88,22 @@ class TaskTile extends ConsumerWidget {
                   Container(
                     margin: const EdgeInsets.only(left: 8),
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 3,
+                      horizontal: 9,
+                      vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFFFE0E0),
+                      color: kError.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(999),
+                      border: Border.all(
+                        color: kError.withValues(alpha: 0.3),
+                      ),
                     ),
                     child: const Text(
                       'High',
                       style: TextStyle(
-                        fontSize: 12,
+                        fontSize: 11,
                         fontWeight: FontWeight.w700,
-                        color: Color(0xFFA61E1E),
+                        color: kError,
                       ),
                     ),
                   ),
@@ -98,6 +115,12 @@ class TaskTile extends ConsumerWidget {
                     decoration: BoxDecoration(
                       color: color.accent,
                       shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: color.accent.withValues(alpha: 0.4),
+                          blurRadius: 6,
+                        ),
+                      ],
                     ),
                   ),
               ],
